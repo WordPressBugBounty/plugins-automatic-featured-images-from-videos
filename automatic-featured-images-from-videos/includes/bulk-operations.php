@@ -15,6 +15,10 @@
  */
 function wds_queue_bulk_processing() {
 
+	if ( ! current_user_can( 'edit_others_posts' ) && ! current_user_can( 'edit_others_pages' ) ) {
+		return;
+	}
+
 	if ( empty( $_POST['wdsafi_nonce'] ) || ! wp_verify_nonce( $_POST['wdsafi_nonce'], 'wdsafi-ajax-nonce' ) ) {
 		wp_die( esc_html__( 'Nonce failure', 'automatic-featured-images-from-videos' ) );
 	}
@@ -45,7 +49,7 @@ function wds_queue_bulk_processing() {
  *
  * @param string $post_type Post type to process.
  */
-function wds_bulk_process_video_query( $post_type ) {
+function wds_bulk_process_video_query( string $post_type ) {
 
 	$post_count = 10;
 
@@ -60,7 +64,7 @@ function wds_bulk_process_video_query( $post_type ) {
 	}
 
 	$reschedule_task = wds_automatic_featured_images_from_videos_wp_query( $post_type, $posts_to_process );
-	if ( $reschedule_task->post_count > 1 ) {
+	if ( $reschedule_task->post_count >= 1 ) {
 		wp_schedule_single_event( time() + ( 60 * 10 ), 'wds_bulk_process_video_query_init', [ $post_type ] );
 	}
 }
